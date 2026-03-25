@@ -37,7 +37,7 @@ def greet(name):
     return "Hello"
 """
     prepared = prepare_input(example_code, language="python")
-    print("=== Snippet input (early draft) ===")
+    print("--- File input + complexity (early integration ---")
     print_summary(prepared)
     print("\nRaw output")
     print(json.dumps(prepared, indent=2))
@@ -46,7 +46,7 @@ def greet(name):
 def run_file_scan(filepath: str):
     prepared = prepare_file(filepath, language="python")
     if prepared.get("status") == "error":
-        print("=== Error ===")
+        print("--- Error ---")
         print(json.dumps(prepared, indent=2))
         return
 
