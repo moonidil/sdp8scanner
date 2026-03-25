@@ -1,0 +1,6 @@
+developer progress (early)
+
+- started input handling for snippet input
+- added preprocessing (normalise line endings + strip)
+- added basic Python parse check using ast.parse
+- left placeholders for complexity, red flags and TDI
