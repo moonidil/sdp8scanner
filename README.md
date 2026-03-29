@@ -1,7 +1,8 @@
 SDP8 Scanner (early draft)
 
 Current progress:
-- snippet input handling
+- both snippet and file input handling (repo handling soon)
 - basic preprocessing
 - basic python parse check
-- placeholders for complexity/security/TDI
+- complexity file merged and integrated
+- placeholders for security/TDI to be added
