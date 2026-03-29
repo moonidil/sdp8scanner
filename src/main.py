@@ -28,6 +28,7 @@ def print_summary(result: dict) -> None:
     print("\nSecurity red flags:", "(not implemented yet)" if result.get("redFlags") is None else result.get("redFlags"))
     print("TDI:", "(not implemented yet)" if result.get("tdi") is None else result.get("tdi"))
 
+    
 #snippet input function, still to be improved for complex and edge cases
 def run_snippet_demo():
     example_code = """
