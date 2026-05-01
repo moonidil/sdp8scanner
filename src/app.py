@@ -77,7 +77,151 @@ if result:
     col3.metric("Red Flags", security.get("redFlagCount", 0))
     col4.metric("Vulnerability Density", metrics.get("vulnerabilityDensity", "N/A"))
     col5.metric("TDI", metrics.get("tdi", "N/A"))
-
+    
+    # ============================================
+    # VISUALIZATIONS - Added by Abdul Basit Farooq
+    # ============================================
+    
+    st.markdown("---")
+    st.subheader("📊 Risk Visualizations")
+    
+    # Create two columns for charts
+    viz_col1, viz_col2 = st.columns(2)
+    
+    with viz_col1:
+        # TDI Gauge Meter
+        import plotly.graph_objects as go
+        
+        tdi_value = metrics.get("tdi", 0)
+        
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number+delta",
+            value=tdi_value,
+            delta={'reference': 50, 'increasing': {'color': "red"}},
+            title={'text': "Technical Debt Index (TDI)", 'font': {'size': 20}},
+            gauge={
+                'axis': {'range': [None, 300], 'tickwidth': 1},
+                'bar': {'color': "darkblue"},
+                'steps': [
+                    {'range': [0, 50], 'color': "lightgreen"},
+                    {'range': [50, 100], 'color': "yellow"},
+                    {'range': [100, 300], 'color': "lightcoral"}
+                ],
+                'threshold': {
+                    'line': {'color': "red", 'width': 4},
+                    'thickness': 0.75,
+                    'value': 50
+                }
+            }
+        ))
+        
+        fig_gauge.update_layout(height=300, margin=dict(l=20, r=20, t=50, b=20))
+        st.plotly_chart(fig_gauge, use_container_width=True)
+        
+        st.caption("🟢 Low Risk: 0-50 | 🟡 Medium Risk: 50-100 | 🔴 High Risk: 100+")
+    
+    with viz_col2:
+        # Complexity Bar Chart
+        import plotly.express as px
+        
+        complexity_score = complexity.get("complexityScore", 0)
+        
+        fig_complexity = px.bar(
+            x=["Cyclomatic Complexity"],
+            y=[complexity_score],
+            title="Complexity Score",
+            labels={'x': '', 'y': 'Score'},
+            color_discrete_sequence=['#1f77b4']
+        )
+        
+        fig_complexity.update_layout(
+            showlegend=False,
+            height=300,
+            margin=dict(l=20, r=20, t=50, b=20),
+            yaxis_title="Complexity Score"
+        )
+        
+        fig_complexity.add_hline(
+            y=10, 
+            line_dash="dash", 
+            line_color="orange",
+            annotation_text="Recommended Max: 10"
+        )
+        
+        st.plotly_chart(fig_complexity, use_container_width=True)
+        
+        st.caption(f"📊 Decision Points: {complexity.get('decisionPoints', 0)}")
+    
+    # Security Findings Visualization (if there are findings)
+    # Security Findings Visualization (if there are findings)
+    findings = security.get("findings", [])
+    if findings:
+        st.markdown("---")
+        viz_col3, viz_col4 = st.columns(2)
+        
+        with viz_col3:
+            # Pie chart of severity distribution
+            severity_counts = {}
+            for finding in findings:
+                severity = finding.get('severity', 'Unknown')
+                severity_counts[severity] = severity_counts.get(severity, 0) + 1
+            
+            fig_pie = px.pie(
+                values=list(severity_counts.values()),
+                names=list(severity_counts.keys()),
+                title="Security Findings by Severity",
+                color_discrete_map={
+                    'High': '#ff6b6b',
+                    'Medium': '#ffa500',
+                    'Low': '#ffeb3b'
+                }
+            )
+            
+            fig_pie.update_layout(height=300, margin=dict(l=20, r=20, t=50, b=20))
+            st.plotly_chart(fig_pie, use_container_width=True)
+        
+        with viz_col4:
+            # Bar chart of finding types
+            type_counts = {}
+            for finding in findings:
+                finding_type = finding.get('type', 'Unknown')
+                type_counts[finding_type] = type_counts.get(finding_type, 0) + 1
+            
+            fig_types = px.bar(
+                x=list(type_counts.keys()),
+                y=list(type_counts.values()),
+                title="Security Issues by Type",
+                labels={'x': 'Issue Type', 'y': 'Count'},
+                color_discrete_sequence=['#e74c3c']
+            )
+            
+            fig_types.update_layout(
+                height=300,
+                margin=dict(l=20, r=20, t=50, b=20),
+                xaxis_tickangle=-45
+            )
+            
+            st.plotly_chart(fig_types, use_container_width=True)
+    
+    # Risk Level Progress Bar
+    st.markdown("---")
+    risk_label = risk.get("label", "Unknown")
+    
+    if "High" in risk_label:
+        risk_progress = 1.0
+        risk_color = "red"
+    elif "Medium" in risk_label:
+        risk_progress = 0.6
+        risk_color = "orange"
+    else:
+        risk_progress = 0.2
+        risk_color = "green"
+    
+    st.metric("Overall Risk Level", risk_label)
+    st.progress(risk_progress)
+    
+    st.markdown("---")
+    
     st.subheader("Risk Classification")
 
     if risk.get("alert"):
