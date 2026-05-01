@@ -1,70 +1,101 @@
 import sys
 import json
 
-from input import prepare_input, prepare_file
-from complexity import calculate_complexity
+from scanner import scan_file, scan_snippet
 
-#print summary of result in human readable format
-#wil be improved on to include more details and present user friendly way
+
 def print_summary(result: dict) -> None:
-    print("\n--- CodeShield Summary (early draft) ---")
+    #human-readable view of the scan result for the CLI
+    print("\n--- CodeShield Summary ---")
     print(f"Status: {result.get('status')}")
-    print(f"Input type: {result.get('inputType')}")
-    print(f"Language: {result.get('language')}")
-    print(f"Parsed: {result.get('parsed')}")
+    print(f"Input type: {result.get('inputType', 'N/A')}")
+    print(f"Language: {result.get('language', 'N/A')}")
+    print(f"Parsed: {result.get('parsed', 'N/A')}")
     print(f"File: {result.get('filepath', 'N/A')}")
-    print(f"Raw lines: {result.get('rawLineCount')}")
-    print(f"Cleaned lines: {result.get('cleanedLineCount')}")
+    print(f"Raw lines: {result.get('rawLineCount', 'N/A')}")
+    print(f"Cleaned lines: {result.get('cleanedLineCount', 'N/A')}")
+
+    #stop here if the scan didn't actually run (bad input, parse fail, etc.)
+    if result.get("status") == "error":
+        print(f"\nError: {result.get('message', 'Unknown error')}")
+        return
 
     complexity = result.get("complexity") or {}
     print("\nComplexity")
-    if complexity:
-        print(f"  Lines of code (calc): {complexity.get('linesOfCode')}")
-        print(f"  Decision points: {complexity.get('decisionPoints')}")
-        print(f"  Cyclomatic complexity: {complexity.get('complexityScore')}")
+    print(f"Lines of code: {complexity.get('linesOfCode', 'N/A')}")
+    print(f"Decision points: {complexity.get('decisionPoints', 'N/A')}")
+    print(f"Cyclomatic complexity: {complexity.get('complexityScore', 'N/A')}")
+
+    security = result.get("security") or {}
+    print("\nSecurity")
+    print(f"Red flags found: {security.get('redFlagCount', 0)}")
+
+    #list each finding on its own line, or a friendly note if there were none
+    findings = security.get("findings", [])
+    if findings:
+        for finding in findings:
+            print(
+                f"- {finding.get('ruleId')} | line {finding.get('line')} | "
+                f"{finding.get('type')} | {finding.get('severity')}"
+            )
     else:
-        print("  (not calculated yet)")
+        print("- No red flags found.")
 
-    print("\nSecurity red flags:", "(not implemented yet)" if result.get("redFlags") is None else result.get("redFlags"))
-    print("TDI:", "(not implemented yet)" if result.get("tdi") is None else result.get("tdi"))
+    metrics = result.get("metrics") or {}
+    print("\nMetrics")
+    print(f"Vulnerability density: {metrics.get('vulnerabilityDensity', 'N/A')}")
+    print(f"TDI: {metrics.get('tdi', 'N/A')}")
 
-    
-#snippet input function, still to be improved for complex and edge cases
-def run_snippet_demo():
+    risk = result.get("risk") or {}
+    print("\nRisk")
+    print(f"Label: {risk.get('label', 'N/A')}")
+    print(f"Alert: {risk.get('alert', 'N/A')}")
+    print(f"Recommendation: {risk.get('recommendation', 'N/A')}")
+
+
+def run_snippet_demo() -> None:
+    #hardcoded demo snippet with obvious red flags for quick testing
     example_code = """
-def greet(name):
-    if name:
-        return "Hello " + name
-    return "Hello"
+import hashlib
+
+def login(username, password):
+    saved_password = "admin123"
+    query = "SELECT * FROM users WHERE name = " + username
+    hashed = hashlib.md5(password.encode()).hexdigest()
+
+    if username and password:
+        return query, hashed, saved_password
+
+    return None
 """
-    prepared = prepare_input(example_code, language="python")
-    print("--- File input + complexity (early integration ---")
-    print_summary(prepared)
-    print("\nRaw output")
-    print(json.dumps(prepared, indent=2))
 
-#if error when retrieving file, error status message print 
-def run_file_scan(filepath: str):
-    prepared = prepare_file(filepath, language="python")
-    if prepared.get("status") == "error":
-        print("--- Error ---")
-        print(json.dumps(prepared, indent=2))
-        return
+    result = scan_snippet(example_code, language="python")
 
-    complexity_result = calculate_complexity(filepath)
-    prepared["complexity"] = {
-        "decisionPoints": complexity_result.get("decision_points"),
-        "complexityScore": complexity_result.get("complexity_score"),
-        "linesOfCode": complexity_result.get("lines_of_code")
-    }
+    print("=== Snippet input + full scan ===")
+    print_summary(result)
 
-    print("File input + complexity (early integration): ")
-    print_summary(prepared)
-    print("\nRaw output")
-    print(json.dumps(prepared, indent=2))
+    #raw JSON dump is handy when checking the full structure
+    print("\n--- Raw JSON Output ---")
+    print(json.dumps(result, indent=2))
+
+
+def run_file_scan(filepath: str) -> None:
+    #real file path coming in from the CLI args
+    result = scan_file(filepath, language="python")
+
+    print("=== File input + full scan ===")
+    print_summary(result)
+
+    print("\n--- Raw JSON Output ---")
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":
+    # Usage:
+    #   python3 src/main.py
+    #   python3 src/main.py samples/test.py
+
+    #if a path was passed in, scan that file; otherwise fall back to the demo snippet
     if len(sys.argv) >= 2:
         run_file_scan(sys.argv[1])
     else:
