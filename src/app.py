@@ -1,27 +1,38 @@
 import json
 import os
 import tempfile
- 
 import streamlit as st
- 
 from scanner import scan_file, scan_snippet
- 
- 
+import base64
+
 st.set_page_config(
     page_title="CodeShield Scanner",
     page_icon="🛡️",
     layout="wide"
 )
- 
+
 # ============================================
-# PROFESSIONAL HEADER - Enhanced by Abdul Basit Farooq
+# PROFESSIONAL HEADER WITH LOGO - Enhanced by Abdul Basit Farooq
+# TEAL THEME TO MATCH LOGO
 # ============================================
-st.markdown("""
-    <div style='text-align: center; padding: 20px; background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%); border-radius: 10px; margin-bottom: 30px;'>
-        <h1 style='color: white; margin: 0;'>🛡️ CodeShield</h1>
-        <p style='color: #e3f2fd; margin: 5px 0 0 0;'>Technical Debt & Security Scanner</p>
+
+# Encode logo as base64
+try:
+    with open("assets/codeshield_logo.png", "rb") as f:
+        logo_data = base64.b64encode(f.read()).decode()
+    logo_html = f'<img src="data:image/png;base64,{logo_data}" style="width: 80px; margin-right: 20px; vertical-align: middle;">'
+except:
+    logo_html = '<span style="font-size: 60px; margin-right: 20px;">🛡️</span>'
+
+st.markdown(f"""
+    <div style='padding: 20px; background: linear-gradient(135deg, #2d5f73 0%, #4a7c96 100%); border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center;'>
+        {logo_html}
+        <div>
+            <h1 style='color: white; margin: 0;'>CodeShield Scanner</h1>
+            <p style='color: #e3f2fd; margin: 5px 0 0 0;'>Technical Debt & Security Analysis Dashboard</p>
+        </div>
     </div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
  
 st.write(
     "Upload a Python file or paste a code snippet to calculate complexity, "
@@ -84,10 +95,11 @@ if result:
  
     # ============================================
     # COLOR-CODED METRICS - Enhanced by Abdul Basit Farooq
+    # TEAL THEME
     # ============================================
     col1, col2, col3, col4, col5 = st.columns(5)
  
-    # Color-coded Complexity
+    # Color-coded Complexity (TEAL THEME)
     complexity_score = complexity.get("complexityScore", 0)
     if complexity_score > 15:
         col1.markdown(f"""<div style='padding:10px; background-color:#ffcccc; border-radius:5px; text-align:center;'>
@@ -100,15 +112,15 @@ if result:
             <h1 style='color:#f57f17; margin:5px 0;'>{complexity_score}</h1>
             <small style='color:#f57f17;'>⚡ Moderate</small></div>""", unsafe_allow_html=True)
     else:
-        col1.markdown(f"""<div style='padding:10px; background-color:#ccf5cc; border-radius:5px; text-align:center;'>
+        col1.markdown(f"""<div style='padding:10px; background-color:#d4f1f4; border-radius:5px; text-align:center;'>
             <p style='margin:0; color:#666; font-size:14px;'>Complexity</p>
-            <h1 style='color:#388e3c; margin:5px 0;'>{complexity_score}</h1>
-            <small style='color:#388e3c;'>✅ Good</small></div>""", unsafe_allow_html=True)
+            <h1 style='color:#2d5f73; margin:5px 0;'>{complexity_score}</h1>
+            <small style='color:#2d5f73;'>✅ Good</small></div>""", unsafe_allow_html=True)
  
     # Regular metric for Lines of Code
     col2.metric("Lines of Code", complexity.get("linesOfCode", "N/A"))
  
-    # Color-coded Red Flags
+    # Color-coded Red Flags (TEAL THEME)
     red_flags = security.get("redFlagCount", 0)
     if red_flags > 5:
         col3.markdown(f"""<div style='padding:10px; background-color:#ffcccc; border-radius:5px; text-align:center;'>
@@ -121,15 +133,15 @@ if result:
             <h1 style='color:#f57f17; margin:5px 0;'>{red_flags}</h1>
             <small style='color:#f57f17;'>⚠️ Issues Found</small></div>""", unsafe_allow_html=True)
     else:
-        col3.markdown(f"""<div style='padding:10px; background-color:#ccf5cc; border-radius:5px; text-align:center;'>
+        col3.markdown(f"""<div style='padding:10px; background-color:#d4f1f4; border-radius:5px; text-align:center;'>
             <p style='margin:0; color:#666; font-size:14px;'>Red Flags</p>
-            <h1 style='color:#388e3c; margin:5px 0;'>{red_flags}</h1>
-            <small style='color:#388e3c;'>✅ Clean</small></div>""", unsafe_allow_html=True)
+            <h1 style='color:#2d5f73; margin:5px 0;'>{red_flags}</h1>
+            <small style='color:#2d5f73;'>✅ Clean</small></div>""", unsafe_allow_html=True)
  
     # Regular metric for Vulnerability Density
     col4.metric("Vulnerability Density", metrics.get("vulnerabilityDensity", "N/A"))
  
-    # Color-coded TDI
+    # Color-coded TDI (TEAL THEME)
     tdi_score = metrics.get("tdi", 0)
     if tdi_score >= 100:
         col5.markdown(f"""<div style='padding:10px; background-color:#ffcccc; border-radius:5px; text-align:center;'>
@@ -142,13 +154,14 @@ if result:
             <h1 style='color:#f57f17; margin:5px 0;'>{tdi_score}</h1>
             <small style='color:#f57f17;'>🟡 High</small></div>""", unsafe_allow_html=True)
     else:
-        col5.markdown(f"""<div style='padding:10px; background-color:#ccf5cc; border-radius:5px; text-align:center;'>
+        col5.markdown(f"""<div style='padding:10px; background-color:#d4f1f4; border-radius:5px; text-align:center;'>
             <p style='margin:0; color:#666; font-size:14px;'>TDI</p>
-            <h1 style='color:#388e3c; margin:5px 0;'>{tdi_score}</h1>
-            <small style='color:#388e3c;'>🟢 Low</small></div>""", unsafe_allow_html=True)
+            <h1 style='color:#2d5f73; margin:5px 0;'>{tdi_score}</h1>
+            <small style='color:#2d5f73;'>🟢 Low</small></div>""", unsafe_allow_html=True)
     
     # ============================================
     # VISUALIZATIONS - Added by Abdul Basit Farooq
+    # TEAL THEME
     # ============================================
     
     st.markdown("---")
@@ -158,7 +171,7 @@ if result:
     viz_col1, viz_col2 = st.columns(2)
     
     with viz_col1:
-        # TDI Gauge Meter
+        # TDI Gauge Meter (TEAL THEME)
         import plotly.graph_objects as go
         
         tdi_value = metrics.get("tdi", 0)
@@ -170,11 +183,11 @@ if result:
             title={'text': "Technical Debt Index (TDI)", 'font': {'size': 20}},
             gauge={
                 'axis': {'range': [None, 300], 'tickwidth': 1},
-                'bar': {'color': "darkblue"},
+                'bar': {'color': "#4a7c96"},  # TEAL
                 'steps': [
-                    {'range': [0, 50], 'color': "lightgreen"},
-                    {'range': [50, 100], 'color': "yellow"},
-                    {'range': [100, 300], 'color': "lightcoral"}
+                    {'range': [0, 50], 'color': "#d4f1f4"},  # Light teal
+                    {'range': [50, 100], 'color': "#ffeb99"},  # Yellow
+                    {'range': [100, 300], 'color': "#ffcccc"}  # Red
                 ],
                 'threshold': {
                     'line': {'color': "red", 'width': 4},
@@ -190,7 +203,7 @@ if result:
         st.caption("🟢 Low Risk: 0-50 | 🟡 Medium Risk: 50-100 | 🔴 High Risk: 100+")
     
     with viz_col2:
-        # Complexity Bar Chart
+        # Complexity Bar Chart (TEAL THEME)
         import plotly.express as px
         
         complexity_score = complexity.get("complexityScore", 0)
@@ -200,7 +213,7 @@ if result:
             y=[complexity_score],
             title="Complexity Score",
             labels={'x': '', 'y': 'Score'},
-            color_discrete_sequence=['#1f77b4']
+            color_discrete_sequence=['#4a7c96']  # TEAL
         )
         
         fig_complexity.update_layout(
@@ -213,7 +226,7 @@ if result:
         fig_complexity.add_hline(
             y=10, 
             line_dash="dash", 
-            line_color="orange",
+            line_color="#2d5f73",  # Dark teal
             annotation_text="Recommended Max: 10"
         )
         
@@ -227,7 +240,7 @@ if result:
         viz_col3, viz_col4 = st.columns(2)
         
         with viz_col3:
-            # Pie chart of severity distribution
+            # Pie chart of severity distribution (TEAL ACCENTS)
             severity_counts = {}
             for finding in findings:
                 severity = finding.get('severity', 'Unknown')
@@ -240,7 +253,7 @@ if result:
                 color_discrete_map={
                     'High': '#ff6b6b',
                     'Medium': '#ffa500',
-                    'Low': '#ffeb3b'
+                    'Low': '#4a7c96'  # TEAL for low severity
                 }
             )
             
@@ -248,7 +261,7 @@ if result:
             st.plotly_chart(fig_pie, use_container_width=True)
         
         with viz_col4:
-            # Bar chart of finding types
+            # Bar chart of finding types (TEAL THEME)
             type_counts = {}
             for finding in findings:
                 finding_type = finding.get('type', 'Unknown')
@@ -259,7 +272,7 @@ if result:
                 y=list(type_counts.values()),
                 title="Security Issues by Type",
                 labels={'x': 'Issue Type', 'y': 'Count'},
-                color_discrete_sequence=['#e74c3c']
+                color_discrete_sequence=['#e74c3c']  # Keep red for security issues
             )
             
             fig_types.update_layout(
@@ -458,4 +471,3 @@ SECURITY FINDINGS:
             - The high-risk alert follows the brief's reference threshold of TDI >= 50.
             """
         )
-
