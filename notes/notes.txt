@@ -32,9 +32,14 @@ brew install python
 
 python3 -m pip install --upgrade pip
 
-4. Install Streamlit for the dashboard:
+4. Install dependencies:
+
+python3 -m pip install -r requirements.txt
+
+If this does not work, install Streamlit manually:
 
 python3 -m pip install streamlit
+
 
 5. Check Streamlit is installed:
 
