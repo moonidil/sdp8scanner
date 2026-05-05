@@ -3,8 +3,8 @@ import os
 import tempfile
 import streamlit as st
 from scanner import scan_file, scan_snippet
-import base64
 from metrics import estimate_refactoring_impact
+import base64
 
 st.set_page_config(
     page_title="CodeShield Scanner",
@@ -52,14 +52,14 @@ if input_mode == "Upload Python file":
     uploaded_file = st.file_uploader("Upload a .py or .txt file", type=["py", "txt"])
  
     if uploaded_file is not None:
-       with tempfile.NamedTemporaryFile(
+        with tempfile.NamedTemporaryFile(
             mode="wb",
             suffix=".py",
             delete=False
         ) as temp_file:
             temp_file.write(uploaded_file.getvalue())
             temp_path = temp_file.name
- 
+
         try:
             if st.button("Run scan"):
                 result = scan_file(temp_path)
@@ -67,7 +67,7 @@ if input_mode == "Upload Python file":
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
- 
+
 else:
     code_text = st.text_area(
         "Paste Python code",
