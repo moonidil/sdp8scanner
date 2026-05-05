@@ -484,9 +484,13 @@ SECURITY FINDINGS:
     with st.expander("Prototype assumptions and limitations"):
         st.write(
             """
-            - Vulnerability density is calculated per 1,000 LOC, so very small sample files may produce high values.
-            - The high-risk alert follows the brief's reference threshold of TDI >= 50.
+            - This prototype currently supports Python only.
+            - The scanner processes one file or snippet at a time.
+            - Repository scanning is not implemented and remains future work.
+            - Security detection is pattern-based and explainable, not a full static analysis engine.
+            - Pattern-based rules may produce false positives or miss issues that require deeper program analysis.
+            - Vulnerability density is calculated per 1000 LOC, so very small sample files may produce high values.
+            - The high-risk alert follows the project threshold of TDI equal to and more than 50
+            - The refactoring simulator provides projected impact only. It does not automatically rewrite or rescan refactored code
             """
-        ) 
-
-
+        )
