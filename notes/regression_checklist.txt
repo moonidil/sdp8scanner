@@ -1,0 +1,77 @@
+CodeShield Regression and Final Verification Checklist
+
+Purpose:
+This checklist verifies that the final dashboard, export features, visualisations and scanner pipeline still work correctly after UI, reporting and refactoring changes.
+
+helps us developers prevent regression as we move forward through the iterations, to be pushed at the end.
+
+1. CLI low-risk scan
+
+Command:
+python3 src/main.py samples/test.py
+
+Expected:
+The scanner runs without crashing, parses the file, shows low or no red flags, calculates TDI and returns a Low Risk result.
+
+2. CLI high-risk scan
+
+Command:
+python3 src/main.py samples/full_demo_risk.py
+
+Expected:
+The scanner runs without crashing, detects red flags, calculates vulnerability density, calculates TDI and returns a High Risk result.
+
+3. Dashboard launch
+
+Command:
+streamlit run src/app.py
+
+Alternative:
+python3 -m streamlit run src/app.py
+
+Expected:
+The dashboard opens locally without import errors.
+
+4. File upload scan
+
+Input:
+Upload samples/full_demo_risk.py through the dashboard.
+
+Expected:
+The dashboard displays complexity, LOC, red flags, vulnerability density, TDI, risk classification and findings.
+
+5. Pasted snippet scan
+
+Expected:
+A pasted Python snippet can be scanned successfully without needing file upload.
+
+6. Export JSON
+
+Expected:
+The JSON export includes the full scan result, including complexity, security, metrics and risk fields.
+
+7. Export text summary
+
+Expected:
+The text summary includes the main metrics, findings and recommendation.
+
+8. Export CSV
+
+Expected:
+The CSV export includes security findings with rule ID, type, severity, line, evidence and recommendation.
+
+9. Visualisations
+
+Expected:
+The TDI gauge, complexity chart and security findings charts match the scan output values.
+
+10. Refactoring impact simulator
+
+Expected:
+The simulator shows projected TDI changes and is clearly labelled as an estimate, not an automatic code refactor.
+
+11. Invalid input handling
+
+Expected:
+Empty input, invalid syntax or unsupported file types return clear errors without crashing the app.
+
