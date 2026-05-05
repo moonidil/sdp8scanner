@@ -1,24 +1,29 @@
 CodeShield Developer Notes
 
-the current stage
-The scanner has now moved beyond the earlier v3 complexity-only integration. The current version supports a fuller prototype pipeline like
+Current Stage
 
-input handling
-preprocessing
-Python parse validation
-cyclomatic complexity integration
-security red-flag detection
-vulnerability density calculation
-TDI calculation
-risk classification
-CLI output
-Streamlit dashboard output
+The scanner has moved beyond the earlier v3 complexity-only integration, and v4 end to end prototype. The current version supports a fuller prototype pipeline:
+
+- input handling
+- preprocessing
+- Python parse validation
+- cyclomatic complexity integration
+- security red-flag detection
+- vulnerability density calculation
+- TDI calculation
+- risk classification
+- CLI output
+- raw JSON output
+- Streamlit dashboard output
+- dashboard file upload scanning
+- dashboard visualisations
+- export support
+- Refactoring Impact Simulator
+- basic pytest coverage for metric calculations
 
 The previous placeholder fields for redFlags and tdi have now been replaced with working values.
 
-
-
-Setup before running
+Setup Before Running
 
 1. Check Python is installed:
 
@@ -28,20 +33,15 @@ If this does not work, install Python 3 from the official Python website or use 
 
 brew install python
 
-3. Upgrade pip:
+2. Upgrade pip:
 
 python3 -m pip install --upgrade pip
 
-4. Install dependencies:
+3. Install dependencies:
 
 python3 -m pip install -r requirements.txt
 
-If this does not work, install Streamlit manually:
-
-python3 -m pip install streamlit
-
-
-5. Check Streamlit is installed:
+4. Check Streamlit is installed:
 
 streamlit --version
 
@@ -49,10 +49,7 @@ If the streamlit command does not work, run the dashboard using:
 
 python3 -m streamlit run src/app.py
 
-
-
-
-How to run the CLI version
+How to Run the CLI Version
 
 From the project root, run the default snippet demo:
 
@@ -68,10 +65,7 @@ python3 src/main.py samples/full_demo_risk.py
 
 The CLI prints a readable summary and raw JSON output.
 
-
-
-
-How to demo the dashboard
+How to Demo the Dashboard
 
 From the project root, run:
 
@@ -85,45 +79,50 @@ Then open the local URL shown in the terminal, usually:
 
 http://localhost:8501
 
+Local Path
 
+~/scannersdp8
 
-
-local path: ~/scannersdp8
-
-
-
-
-Current implementation evidence
+Current Implementation Evidence
 
 CLI evidence:
+
 python3 src/main.py samples/test.py
 python3 src/main.py samples/full_demo_risk.py
 
 Dashboard evidence:
+
 streamlit run src/app.py
+python3 -m streamlit run src/app.py
 
+Syntax check:
 
-Known limitations
+python3 -m py_compile src/app.py src/metrics.py
 
-The prototype currently supports Python only
-Repository link scanning is not implemented and remains future work
-Security detection is pattern-based and explainable, not a full static analysis engine.
-Vulnerability density can appear high on small files because it is calculated per 1,000 lines of code.
-Complexity calculation depends on the agreed decision-point approach and should be documented by Abdul.
+Test evidence:
 
-Remaining work for the group
+python3 -m pytest tests/test_metrics.py
 
-Security Expert:
-Review and approve the current red-flag rules and recommendations.
+Current Refactoring Evidence
 
-Tester:
-Run test cases for low-risk, high-risk, invalid input, CLI output and dashboard output.
+The Refactoring Impact Simulator has been refactored so that its projection logic is handled by metrics.py rather than being embedded directly inside app.py.
 
-Abdul:
-Document the complexity calculation assumptions, explain the decision-point approach, and produce before/after refactoring evidence.
+Evidence:
 
-Analyst/Designers:
-Update UML/design/report sections to reflect the final pipeline and dashboard.
+- src/metrics.py contains estimate_refactoring_impact()
+- src/app.py imports and displays the projection result
+- tests/test_metrics.py verifies the extracted projection helper
+- notes/regression_checklist.txt records final dashboard and scanner verification checks
+- notes/refactoring_idil.txt records the refactoring support evidence
 
-Project Manager:
-Update Jira evidence, task ownership and weekly progress.
+Known Limitations
+
+- The prototype currently supports Python only
+- The scanner processes one file or pasted snippet at a time
+- Repository-level scanning is not implemented and remains future work.
+- Security detection is pattern-based and explainable, not a full static analysis engine
+- Pattern-based rules may produce false positives or miss issues requiring deeper program analysis
+- Vulnerability density can appear high on small files because it is calculated per 1,000 lines of code
+- The high-risk alert follows the project threshold of TDI >= 50
+- The Refactoring Impact Simulator provides projected impact only. It does not automatically rewrite or rescan refactored code 
+- Complexity calculation depends on the agreed decision-point approach and is documented by Abdul
