@@ -3,7 +3,6 @@ import os
 import tempfile
 import streamlit as st
 from scanner import scan_file, scan_snippet
-from metrics import estimate_refactoring_impact
 import base64
 
 st.set_page_config(
@@ -59,7 +58,7 @@ if input_mode == "Upload Python file":
         ) as temp_file:
             temp_file.write(uploaded_file.getvalue())
             temp_path = temp_file.name
-
+ 
         try:
             if st.button("Run scan"):
                 result = scan_file(temp_path)
@@ -67,7 +66,7 @@ if input_mode == "Upload Python file":
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
-
+ 
 else:
     code_text = st.text_area(
         "Paste Python code",
@@ -302,68 +301,49 @@ if result:
     st.progress(risk_progress)
     
     # ============================================
-    # REFACTORING SIMULATOR - Refactored to use metrics helper
+    # REFACTORING SIMULATOR - Added by Abdul Basit Farooq
     # ============================================
     st.markdown("---")
     st.subheader("💡 Refactoring Impact Simulator")
-    st.caption("See how fixing issues could improve the TDI score")
-
-    st.info(
-        "This simulator shows projected impact only. It estimates how the TDI may change "
-        "if selected findings are resolved. It does not automatically rewrite the code or "
-        "replace a real before/after refactoring scan."
-    )
-
+    st.caption("See how fixing issues would improve your TDI score")
+ 
     col_sim1, col_sim2, col_sim3 = st.columns(3)
-
+ 
     with col_sim1:
         st.markdown("**📊 Current State**")
         current_tdi = metrics.get("tdi", 0)
-
-        st.metric(
-            "TDI Score",
-            f"{current_tdi:.1f}",
-            delta=f"+{current_tdi - 50:.1f} above threshold" if current_tdi >= 50 else f"{50 - current_tdi:.1f} below threshold",
-            delta_color="inverse" if current_tdi >= 50 else "normal"
-        )
-
-    projection = estimate_refactoring_impact(current_tdi, findings)
-
+        st.metric("TDI Score", f"{current_tdi:.1f}", 
+                  delta=f"+{current_tdi-50:.1f} above threshold" if current_tdi >= 50 else f"{50-current_tdi:.1f} below threshold",
+                  delta_color="inverse" if current_tdi >= 50 else "normal")
+ 
     with col_sim2:
         st.markdown("**🔧 Fix High-Risk Issues**")
-        simulated_tdi_high = projection["projectedAfterHighRiskFixes"]
-
-        st.metric(
-            "Projected TDI",
-            f"{simulated_tdi_high:.1f}",
-            delta=f"-{current_tdi - simulated_tdi_high:.1f} improvement",
-            delta_color="normal"
-        )
-
-        if projection["movesToLowRiskAfterHighRiskFixes"]:
+        high_severity_count = sum(1 for f in findings if f.get('severity') == 'High')
+        simulated_tdi_high = max(0, current_tdi - (high_severity_count * 12))
+        
+        st.metric("Projected TDI", f"{simulated_tdi_high:.1f}", 
+                  delta=f"-{current_tdi-simulated_tdi_high:.1f} improvement",
+                  delta_color="normal")
+        
+        if simulated_tdi_high < 50:
             st.success("✅ Moves to LOW RISK!")
         elif simulated_tdi_high < current_tdi:
             st.info("📉 Still needs more work")
-        else:
-            st.info("No high-risk issue improvement projected.")
-
+ 
     with col_sim3:
         st.markdown("**✨ Fix All Issues**")
-        simulated_tdi_all = projection["projectedAfterAllFixes"]
-
-        st.metric(
-            "Projected TDI",
-            f"{simulated_tdi_all:.1f}",
-            delta=f"-{current_tdi - simulated_tdi_all:.1f} improvement",
-            delta_color="normal"
-        )
-
-        if projection["movesToLowRiskAfterAllFixes"]:
+        all_issues_count = security.get("redFlagCount", 0)
+        simulated_tdi_all = max(0, current_tdi - (all_issues_count * 8))
+        
+        st.metric("Projected TDI", f"{simulated_tdi_all:.1f}",
+                  delta=f"-{current_tdi-simulated_tdi_all:.1f} improvement",
+                  delta_color="normal")
+        
+        if simulated_tdi_all < 50:
             st.success("🎯 TARGET ACHIEVED!")
         else:
-            remaining_gap = max(0, simulated_tdi_all - projection["highRiskThreshold"])
-            st.warning(f"⚠️ Needs {remaining_gap:.0f}+ more improvement")
-
+            st.warning(f"⚠️ Needs {simulated_tdi_all-50:.0f}+ more improvement")
+    
     st.markdown("---")
     
     st.subheader("Risk Classification")

@@ -1,44 +1,69 @@
 # CodeShield - Cyclomatic Complexity Calculator
-# Developer: Abdul Basit Farooq
+# Developer: Abdul Basit Farooq (Enhanced Version)
+
+import ast
 
 def calculate_complexity(filepath):
-    """Read a Python file and calculate its Cyclomatic Complexity."""
-    
-    # Decision point keywords to look for
-    decision_points = ['if ', 'elif ', 'for ', 'while ', 'except ', ' and ', ' or ']
-    
-    count = 0
-    lines_of_code = 0
-
+    """
+    Calculate Cyclomatic Complexity using AST parsing for accuracy.
+    More robust than simple string matching.
+    """
     with open(filepath, 'r') as file:
-        for line in file:
-            stripped = line.strip()
-            
-            # Skip blank lines and comments
-            if stripped == '' or stripped.startswith('#'):
-                continue
-            
-            lines_of_code += 1
-            
-            # Count decision points
-            for dp in decision_points:
-                if dp in line:
-                    count += 1
-
-    complexity = count + 1  # CC = Decision Points + 1
+        code = file.read()
+    
+    # Parse the code into AST
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return {
+            'filepath': filepath,
+            'decision_points': 0,
+            'complexity_score': 0,
+            'lines_of_code': 0,
+            'error': 'Invalid Python syntax'
+        }
+    
+    decision_points = 0
+    
+    # Walk through AST nodes and count decision points
+    for node in ast.walk(tree):
+        # if, elif
+        if isinstance(node, ast.If):
+            decision_points += 1
+        # for loops
+        elif isinstance(node, ast.For):
+            decision_points += 1
+        # while loops
+        elif isinstance(node, ast.While):
+            decision_points += 1
+        # except handlers
+        elif isinstance(node, ast.ExceptHandler):
+            decision_points += 1
+        # and, or (boolean operators)
+        elif isinstance(node, ast.BoolOp):
+            decision_points += len(node.values) - 1
+        # match/case (Python 3.10+)
+        elif isinstance(node, ast.Match):
+            decision_points += len(node.cases)
+    
+    # Count actual lines of code (non-blank, non-comment)
+    lines_of_code = len([
+        line for line in code.split('\n') 
+        if line.strip() and not line.strip().startswith('#')
+    ])
+    
+    complexity = decision_points + 1
     
     return {
         'filepath': filepath,
-        'decision_points': count,
+        'decision_points': decision_points,
         'complexity_score': complexity,
         'lines_of_code': lines_of_code
     }
 
-
-# Run the scanner
+# Keep the same main section...
 if __name__ == '__main__':
     import sys
-    
     if len(sys.argv) < 2:
         print("Usage: python complexity.py <filepath>")
     else:
