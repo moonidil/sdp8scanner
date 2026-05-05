@@ -1,0 +1,124 @@
+CodeShield Developer Notes
+
+the current stage
+The scanner has now moved beyond the earlier v3 complexity-only integration. The current version supports a fuller prototype pipeline like
+
+input handling
+preprocessing
+Python parse validation
+cyclomatic complexity integration
+security red-flag detection
+vulnerability density calculation
+TDI calculation
+risk classification
+CLI output
+Streamlit dashboard output
+
+The previous placeholder fields for redFlags and tdi have now been replaced with working values.
+
+
+
+Setup before running
+
+1. Check Python is installed:
+
+python3 --version
+
+If this does not work, install Python 3 from the official Python website or use Homebrew on Mac:
+
+brew install python
+
+3. Upgrade pip:
+
+python3 -m pip install --upgrade pip
+
+4. Install Streamlit for the dashboard:
+
+python3 -m pip install streamlit
+
+5. Check Streamlit is installed:
+
+streamlit --version
+
+If the streamlit command does not work, run the dashboard using:
+
+python3 -m streamlit run src/app.py
+
+
+
+
+How to run the CLI version
+
+From the project root, run the default snippet demo:
+
+python3 src/main.py
+
+Run a low-risk file scan:
+
+python3 src/main.py samples/test.py
+
+Run the main high-risk demo scan:
+
+python3 src/main.py samples/full_demo_risk.py
+
+The CLI prints a readable summary and raw JSON output.
+
+
+
+
+How to demo the dashboard
+
+From the project root, run:
+
+streamlit run src/app.py
+
+Alternative if the streamlit command is not recognised:
+
+python3 -m streamlit run src/app.py
+
+Then open the local URL shown in the terminal, usually:
+
+http://localhost:8501
+
+
+
+
+local path: ~/scannersdp8
+
+
+
+
+Current implementation evidence
+
+CLI evidence:
+python3 src/main.py samples/test.py
+python3 src/main.py samples/full_demo_risk.py
+
+Dashboard evidence:
+streamlit run src/app.py
+
+
+Known limitations
+
+The prototype currently supports Python only
+Repository link scanning is not implemented and remains future work
+Security detection is pattern-based and explainable, not a full static analysis engine.
+Vulnerability density can appear high on small files because it is calculated per 1,000 lines of code.
+Complexity calculation depends on the agreed decision-point approach and should be documented by Abdul.
+
+Remaining work for the group
+
+Security Expert:
+Review and approve the current red-flag rules and recommendations.
+
+Tester:
+Run test cases for low-risk, high-risk, invalid input, CLI output and dashboard output.
+
+Abdul:
+Document the complexity calculation assumptions, explain the decision-point approach, and produce before/after refactoring evidence.
+
+Analyst/Designers:
+Update UML/design/report sections to reflect the final pipeline and dashboard.
+
+Project Manager:
+Update Jira evidence, task ownership and weekly progress.
