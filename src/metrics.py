@@ -51,3 +51,44 @@ def classify_risk(tdi: float) -> Dict:
         "alert": False,
         "recommendation": "No immediate refactoring required."
     }
+
+HIGH_RISK_THRESHOLD = 50
+HIGH_SEVERITY_FIX_IMPACT = 12
+ANY_ISSUE_FIX_IMPACT = 8
+
+
+def estimate_refactoring_impact(current_tdi: float, findings: list) -> dict:
+    """
+    Estimate how the TDI could change if security findings were resolved.
+
+    This supports the dashboard's Refactoring Impact Simulator. It is a projection
+    helper only: it does not rewrite source code or replace a real before/after scan.
+    """
+    high_severity_count = sum(
+        1 for finding in findings
+        if finding.get("severity") == "High"
+    )
+
+    total_findings = len(findings)
+
+    projected_after_high_risk_fixes = max(
+        0,
+        round(current_tdi - (high_severity_count * HIGH_SEVERITY_FIX_IMPACT), 2)
+    )
+
+    projected_after_all_fixes = max(
+        0,
+        round(current_tdi - (total_findings * ANY_ISSUE_FIX_IMPACT), 2)
+    )
+
+    return {
+        "currentTdi": round(current_tdi, 2),
+        "highSeverityFindings": high_severity_count,
+        "totalFindings": total_findings,
+        "projectedAfterHighRiskFixes": projected_after_high_risk_fixes,
+        "projectedAfterAllFixes": projected_after_all_fixes,
+        "highRiskThreshold": HIGH_RISK_THRESHOLD,
+        "movesToLowRiskAfterHighRiskFixes": projected_after_high_risk_fixes < HIGH_RISK_THRESHOLD,
+        "movesToLowRiskAfterAllFixes": projected_after_all_fixes < HIGH_RISK_THRESHOLD,
+        "note": "Projection only. This does not automatically rewrite or rescan code."
+    }
