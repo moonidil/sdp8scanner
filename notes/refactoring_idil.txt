@@ -1,0 +1,40 @@
+Idil Cabdullahi, Developer Refactoring Support Evidence
+
+Summary:
+My main development contribution was the scanner pipeline, including input handling, parse validation, complexity integration, vulnerability detection, vulnerability density, TDI calculation, risk classification CLI output and dashboard reporting.
+
+For the refactoring/code-quality section, I completed a focused support refactor on the Refactoring Impact Simulator Abdul worked on.
+
+Refactoring change:
+The simulator's projected TDI calculation was moved out of app.py and into metrics.py as estimate_refactoring_impact().
+
+Before:
+- app.py handled dashboard display.
+- app.py also calculated projected TDI changes.
+- Hardcoded projection logic was embedded inside the UI layer.
+- The simulator calculation was harder to test separately.
+
+After:
+- metrics.py handles the projection calculation.
+- app.py displays the simulator output.
+- The simulator logic is reusable and independently testable.
+- The dashboard is cleaner and more focused on presentation.
+
+Why it improves code quality:
+it improves separation of concerns. now the dashboard file now focuses on UI display, while the metrics module handles metric-related calculations.
+
+Accuracy improvement:
+The simulator is now clearly labelled as a projection tool. It estimates how TDI may change if issues are fixed, but it does not automatically rewrite code or replace a real before/after refactoring scan.
+
+Verification:
+The scanner and dashboard should be checked after the change using:
+python3 -m py_compile src/app.py src/metrics.py
+python3 -m pytest tests/test_metrics.py
+python3 src/main.py samples/full_demo_risk.py
+python3 -m streamlit run src/app.py
+
+Evidence:
+- src/metrics.py contains estimate_refactoring_impact()
+- src/app.py imports and displays the projection result
+- tests/test_metrics.py verifies the extracted logic
+- notes/regression_checklist.txt records final verification checks
