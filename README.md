@@ -2,7 +2,7 @@
 
 CodeShield is a prototype technical debt and security scanner developed for our SDP8 group project
 The tool analyses Python source code, calculates complexity metrics, detects security red flags, calculates vulnerability density, produces a technical debt index (TDI) and classifies the modules by risk.
-The current prototype supports command-line scanning, pasted snippet scanning, file upload scanning and a Streamlit dashboard demo.
+The current prototype supports command-line scanning, pasted snippet scanning, file upload scanning and a Streamlit dashboard demo, and the prototyp is open to future work by being organised and scalable.
 
 ## Current Features
 
@@ -28,7 +28,7 @@ The current prototype supports command-line scanning, pasted snippet scanning, f
 
 ## Prototype Scope
 
-This is a coursework prototype, not a full commercial static analysis tool.
+This is a coursework prototype and is not a full commercial static analysis tool.
 
 The current assumptions:
 
