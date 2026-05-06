@@ -1,4 +1,5 @@
 CodeShield Regression and Final Verification Checklist
+(Developer: Idil Cabdullahi)
 
 Purpose:
 This checklist verifies that the final dashboard, export features, visualisations and scanner pipeline still work correctly after UI, reporting and refactoring changes.

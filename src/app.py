@@ -1,3 +1,11 @@
+#Developer: Idil Cabdullahi 
+#   (before visualisations + first version refactorer simulator)
+
+#visualisations and refactoring added by Abdul Basit Farooq
+
+#later enhanced by improved code structure/quality and refactorer support
+
+
 import json
 import os
 import tempfile

@@ -1,3 +1,4 @@
+#Developer: idil cabdullahi
 #sample snippet to mke sure its working. to be improved later for more complex code and edge cases
 def classify_score(score):
     if score > 80:

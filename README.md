@@ -71,3 +71,6 @@ notes/
 requirements.txt       Python dependencies
 README.md              project overview and usage notes
 .gitignore             ignored files and folders
+
+
+- written by Developer: idil cabdullahi

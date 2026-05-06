@@ -1,4 +1,4 @@
-developer progress (early)
+developer progress (first version)
 
 - started input handling for snippet input
 - added preprocessing (normalise line endings + strip)
