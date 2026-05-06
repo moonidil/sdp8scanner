@@ -1,3 +1,4 @@
+#Developer: Idil Cabdullahi
 streamlit
 plotly
 pytest
