@@ -3,6 +3,7 @@ import os
 import tempfile
 import streamlit as st
 from scanner import scan_file, scan_snippet
+from metrics import estimate_refactoring_impact
 import base64
 
 st.set_page_config(
@@ -299,69 +300,71 @@ if result:
     
     st.metric("Overall Risk Level", risk_label)
     st.progress(risk_progress)
-    
     # ============================================
-    # REFACTORING SIMULATOR - Added by Abdul Basit Farooq
+    # REFACTORING SIMULATOR - Refactored to use metrics helper
     # ============================================
     st.markdown("---")
     st.subheader("💡 Refactoring Impact Simulator")
-    st.caption("See how fixing issues would improve your TDI score")
- 
+    st.caption("See how fixing issues could improve the TDI score")
+    st.info(
+        "This simulator shows projected impact only. It estimates how the TDI may change "
+        "if selected findings are resolved. It does not automatically rewrite the code or "
+        "replace a real before/after refactoring scan."
+    )
+
     col_sim1, col_sim2, col_sim3 = st.columns(3)
- 
+
     with col_sim1:
         st.markdown("**📊 Current State**")
         current_tdi = metrics.get("tdi", 0)
-        st.metric("TDI Score", f"{current_tdi:.1f}", 
-                  delta=f"+{current_tdi-50:.1f} above threshold" if current_tdi >= 50 else f"{50-current_tdi:.1f} below threshold",
-                  delta_color="inverse" if current_tdi >= 50 else "normal")
- 
+        st.metric(
+            "TDI Score",
+            f"{current_tdi:.1f}",
+            delta=f"+{current_tdi - 50:.1f} above threshold" if current_tdi >= 50 else f"{50 - current_tdi:.1f} below threshold",
+            delta_color="inverse" if current_tdi >= 50 else "normal"
+        )
+
+    projection = estimate_refactoring_impact(current_tdi, findings)
+
     with col_sim2:
         st.markdown("**🔧 Fix High-Risk Issues**")
-        high_severity_count = sum(1 for f in findings if f.get('severity') == 'High')
-        simulated_tdi_high = max(0, current_tdi - (high_severity_count * 12))
-        
-        st.metric("Projected TDI", f"{simulated_tdi_high:.1f}", 
-                  delta=f"-{current_tdi-simulated_tdi_high:.1f} improvement",
-                  delta_color="normal")
-        
-        if simulated_tdi_high < 50:
+        simulated_tdi_high = projection["projectedAfterHighRiskFixes"]
+        improvement_high = current_tdi - simulated_tdi_high
+
+        st.metric(
+            "Projected TDI",
+            f"{simulated_tdi_high:.1f}",
+            delta=f"{improvement_high:.1f} improvement",
+            delta_color="normal"
+        )
+
+        if projection["movesToLowRiskAfterHighRiskFixes"]:
             st.success("✅ Moves to LOW RISK!")
         elif simulated_tdi_high < current_tdi:
             st.info("📉 Still needs more work")
- 
+        else:
+            st.info("No high-risk issue improvement projected.")
+
     with col_sim3:
         st.markdown("**✨ Fix All Issues**")
-        all_issues_count = security.get("redFlagCount", 0)
-        simulated_tdi_all = max(0, current_tdi - (all_issues_count * 8))
-        
-        st.metric("Projected TDI", f"{simulated_tdi_all:.1f}",
-                  delta=f"-{current_tdi-simulated_tdi_all:.1f} improvement",
-                  delta_color="normal")
-        
-        if simulated_tdi_all < 50:
+        simulated_tdi_all = projection["projectedAfterAllFixes"]
+        improvement_all = current_tdi - simulated_tdi_all
+
+        st.metric(
+            "Projected TDI",
+            f"{simulated_tdi_all:.1f}",
+            delta=f"{improvement_all:.1f} improvement",
+            delta_color="normal"
+        )
+
+        if projection["movesToLowRiskAfterAllFixes"]:
             st.success("🎯 TARGET ACHIEVED!")
         else:
-            st.warning(f"⚠️ Needs {simulated_tdi_all-50:.0f}+ more improvement")
-    
+            remaining_gap = max(0, simulated_tdi_all - projection["highRiskThreshold"])
+            st.warning(f"⚠️ Needs {remaining_gap:.0f}+ more improvement")
+
     st.markdown("---")
     
-    st.subheader("Risk Classification")
- 
-    if risk.get("alert"):
-        st.error(f"{risk.get('label')} - {risk.get('recommendation')}")
-    elif risk.get("label") == "Medium Risk":
-        st.warning(f"{risk.get('label')} - {risk.get('recommendation')}")
-    else:
-        st.success(f"{risk.get('label')} - {risk.get('recommendation')}")
- 
-    st.subheader("Security Findings")
- 
-    if findings:
-        st.dataframe(findings, use_container_width=True)
-    else:
-        st.info("No security red flags were found.")
- 
     # ============================================
     # EXPORT BUTTONS - Added by Abdul Basit Farooq
     # ============================================
